@@ -40,27 +40,36 @@ def get_fun_fact(n):
 # API Endpoint
 @app.route('/api/classify-number', methods=['GET'])
 def classify_number():
-    # Extract and validate the number parameter
+    # Extract the number parameter
     number = request.args.get('number')
-    if not number or not number.lstrip('-').isdigit():
+
+    # Validate the input
+    try:
+        # Convert the input to a float (to handle both integers and decimals)
+        number = float(number)
+    except (ValueError, TypeError):
+        # Return 400 if the input is not a valid number
         return jsonify({"number": number, "error": True}), 400
 
-    number = int(number)
+    # Determine properties (only for integers)
     properties = []
-
-    # Determine properties
-    if is_armstrong(number):
-        properties.append("armstrong")
-    properties.append("odd" if number % 2 else "even")
+    if number == int(number):  # Check if the number is an integer
+        number = int(number)  # Convert to integer for property checks
+        if is_armstrong(number):
+            properties.append("armstrong")
+        properties.append("odd" if number % 2 else "even")
+    else:
+        # For floating-point numbers, skip Armstrong and odd/even checks
+        properties.append("floating-point")
 
     # Build response
     response = {
         "number": number,
-        "is_prime": is_prime(number),
-        "is_perfect": is_perfect(number),
+        "is_prime": is_prime(int(number)) if number == int(number) else False,  # Prime only for integers
+        "is_perfect": is_perfect(int(number)) if number == int(number) else False,  # Perfect only for integers
         "properties": properties,
-        "digit_sum": sum(int(d) for d in str(abs(number))),
-        "fun_fact": get_fun_fact(number)
+        "digit_sum": sum(int(d) for d in str(abs(int(number)))) if number == int(number) else None,  # Digit sum only for integers
+        "fun_fact": get_fun_fact(int(number)) if number == int(number) else "No fun fact available for floating-point numbers."
     }
     return jsonify(response), 200
 
