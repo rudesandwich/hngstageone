@@ -1,9 +1,10 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, Response
 import requests
+import json  # Import the json module
 
 app = Flask(__name__)
 
-# Helper Functions
+# Helper Functions (keep these the same as before)
 def is_prime(n):
     """Check if a number is prime."""
     if n < 2:
@@ -48,8 +49,14 @@ def classify_number():
         # Convert the input to a float (to handle both integers and decimals)
         number = float(number)
     except (ValueError, TypeError):
-        # Return 400 if the input is not a valid number
-        return jsonify({"number": number, "error": True}), 400
+        # Return 400 with the specified error format
+        error_response = {"number": str(number), "error": True}
+        return Response(
+            json.dumps(error_response, indent=4),  # Pretty-print JSON
+            status=400,
+            mimetype='application/json',  # Explicitly set the Content-Type header
+            headers={'Content-Type': 'application/json'}  # Ensure the header is set
+        )
 
     # Determine properties (only for integers)
     properties = []
@@ -71,8 +78,27 @@ def classify_number():
         "digit_sum": sum(int(d) for d in str(abs(int(number)))) if number == int(number) else None,  # Digit sum only for integers
         "fun_fact": get_fun_fact(int(number)) if number == int(number) else "No fun fact available for floating-point numbers."
     }
-    return jsonify(response), 200
+
+    # Return pretty-printed JSON response
+    return Response(
+        json.dumps(response, indent=4),  # Pretty-print JSON
+        status=200,
+        mimetype='application/json',  # Explicitly set the Content-Type header
+        headers={'Content-Type': 'application/json'}  # Ensure the header is set
+    )
+
+# Health Check Endpoint (optional but recommended)
+@app.route('/health', methods=['GET'])
+def health_check():
+    health_response = {"status": "healthy"}
+    return Response(
+        json.dumps(health_response, indent=4),  # Pretty-print JSON
+        status=200,
+        mimetype='application/json',  # Explicitly set the Content-Type header
+        headers={'Content-Type': 'application/json'}  # Ensure the header is set
+    )
 
 # Run the app
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
+
