@@ -1,8 +1,10 @@
 from flask import Flask, request, Response
+from flask_cors import CORS  # Import CORS
 import requests
-import json  # Import the json module
+import json
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
 
 # Helper Functions (keep these the same as before)
 def is_prime(n):
@@ -26,9 +28,9 @@ def is_perfect(n):
 
 def is_armstrong(n):
     """Check if a number is an Armstrong number."""
-    digits = [int(d) for d in str(n)]
+    digits = [int(d) for d in str(abs(n))]  # Use absolute value for negative numbers
     length = len(digits)
-    return sum(d ** length for d in digits) == n
+    return sum(d ** length for d in digits) == abs(n)  # Compare with absolute value
 
 def get_fun_fact(n):
     """Fetch a fun fact about the number from numbersapi.com."""
@@ -52,7 +54,7 @@ def classify_number():
         # Return 400 with the specified error format
         error_response = {"number": str(number), "error": True}
         return Response(
-            json.dumps(error_response, indent=4),  # Pretty-print JSON
+            json.dumps(error_response, separators=(',', ':')),  # Compact JSON
             status=400,
             mimetype='application/json',  # Explicitly set the Content-Type header
             headers={'Content-Type': 'application/json'}  # Ensure the header is set
@@ -60,7 +62,7 @@ def classify_number():
 
     # Determine properties (only for integers)
     properties = []
-    if number == int(number):  # Check if the number is an integer
+    if number == int(number):  # Check if the number is an integer (including negative numbers)
         number = int(number)  # Convert to integer for property checks
         if is_armstrong(number):
             properties.append("armstrong")
@@ -79,9 +81,9 @@ def classify_number():
         "fun_fact": get_fun_fact(int(number)) if number == int(number) else "No fun fact available for floating-point numbers."
     }
 
-    # Return pretty-printed JSON response
+    # Return compact JSON response
     return Response(
-        json.dumps(response, indent=4),  # Pretty-print JSON
+        json.dumps(response, separators=(',', ':')),  # Compact JSON
         status=200,
         mimetype='application/json',  # Explicitly set the Content-Type header
         headers={'Content-Type': 'application/json'}  # Ensure the header is set
@@ -92,7 +94,7 @@ def classify_number():
 def health_check():
     health_response = {"status": "healthy"}
     return Response(
-        json.dumps(health_response, indent=4),  # Pretty-print JSON
+        json.dumps(health_response, separators=(',', ':')),  # Compact JSON
         status=200,
         mimetype='application/json',  # Explicitly set the Content-Type header
         headers={'Content-Type': 'application/json'}  # Ensure the header is set
