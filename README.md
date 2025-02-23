@@ -1,7 +1,7 @@
 # hngstageone
 Here's a sample README.md file that outlines the steps to launch your Python application using Docker:
 
-*Get Up Repo*
+*Git Up Repo*
 
 
 This repository contains a Python application that can be launched using Docker.
